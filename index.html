@@ -9,601 +9,365 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --black:#000;
   --ember:#ff4500;
   --ember2:#ff6a00;
   --gold:#c8973a;
-  --gold2:#ffd700;
 }
 html,body{width:100%;height:100%;overflow:hidden;background:#000}
 body{font-family:'Cinzel',serif;cursor:none;overscroll-behavior:none}
 
 /* CURSOR */
-.cursor{position:fixed;width:10px;height:10px;background:var(--ember);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;filter:blur(1px);transition:transform 0.05s}
+.cursor{position:fixed;width:10px;height:10px;background:var(--ember);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;transition:transform 0.05s}
 @media(max-width:768px){.cursor{display:none}}
 
-/* ============================================================
-   ENTER GATE — pantalla inicial de bienvenida
-   ============================================================ */
-#enterGate{
-  position:fixed;
-  inset:0;
-  z-index:9000;
+/* EMBER PARTICLES */
+.ember-p{position:fixed;pointer-events:none;z-index:9998;border-radius:50%;animation:emberRise linear forwards}
+@keyframes emberRise{0%{opacity:.8;transform:translateY(0) translateX(0)}100%{opacity:0;transform:translateY(-130px) translateX(var(--dx))}}
+
+/* ── ENTER GATE ── */
+#gate{
+  position:fixed;inset:0;z-index:8000;
   background:#000;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:2rem;
-  transition:opacity 1s ease, visibility 1s ease;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  transition:opacity 1.2s ease,visibility 1.2s ease;
 }
-#enterGate.hidden{
-  opacity:0;
-  visibility:hidden;
-  pointer-events:none;
-}
-.gate-skull{
-  font-size:3rem;
-  animation:gatePulse 2s ease-in-out infinite;
-}
-@keyframes gatePulse{0%,100%{opacity:0.4;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+#gate.gone{opacity:0;visibility:hidden;pointer-events:none}
+.gate-fire{position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(to top,rgba(255,40,0,.09),transparent);pointer-events:none}
+.gate-scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,40,0,.018) 0,rgba(255,40,0,.018) 1px,transparent 1px,transparent 7px);pointer-events:none}
+.gate-ring{width:64px;height:64px;border-radius:50%;border:1px solid rgba(255,69,0,.28);display:flex;align-items:center;justify-content:center;position:relative;animation:ringPulse 2.5s ease-in-out infinite}
+.gate-ring::before{content:'';position:absolute;inset:-10px;border-radius:50%;border:1px solid rgba(255,69,0,.09)}
+@keyframes ringPulse{0%,100%{box-shadow:0 0 0 rgba(255,69,0,0)}50%{box-shadow:0 0 20px rgba(255,69,0,.15)}}
+.gate-skull{font-size:28px;line-height:1}
+.gate-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,16vw,80px);color:#fff;line-height:.82;text-align:center;letter-spacing:.04em}
+.gate-name{font-family:'Cinzel Decorative',serif;font-size:clamp(14px,4.5vw,22px);color:var(--ember);letter-spacing:.4em;display:block;margin-top:8px;font-weight:400}
+.gate-btn{border:1px solid rgba(255,69,0,.45);color:#fff;background:transparent;padding:13px 36px;font-size:9px;letter-spacing:.55em;text-transform:uppercase;font-family:'Cinzel',serif;cursor:pointer;transition:all .35s;position:relative;overflow:hidden}
+.gate-btn::before{content:'';position:absolute;inset:0;background:rgba(255,69,0,.07);transform:scaleX(0);transform-origin:left;transition:transform .4s}
+.gate-btn:hover::before{transform:scaleX(1)}
+.gate-btn:hover{border-color:var(--ember);letter-spacing:.6em}
+.gate-hint{font-size:8px;letter-spacing:.45em;color:rgba(255,69,0,.22);text-transform:uppercase}
 
-.gate-title{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(3rem,18vw,7rem);
-  color:#fff;
-  letter-spacing:0.05em;
-  line-height:0.85;
-  text-align:center;
-  text-shadow:0 0 60px rgba(255,69,0,0.4);
-}
-.gate-title span{
-  display:block;
-  font-family:'Cinzel Decorative',serif;
-  font-size:clamp(1rem,5vw,2rem);
-  color:var(--ember);
-  letter-spacing:0.4em;
-  font-weight:400;
-}
-
-.gate-btn{
-  position:relative;
-  font-family:'Cinzel',serif;
-  font-size:0.65rem;
-  letter-spacing:0.6em;
-  text-transform:uppercase;
-  color:#fff;
-  background:transparent;
-  border:1px solid rgba(255,69,0,0.5);
-  padding:1rem 3rem;
-  cursor:pointer;
-  transition:all 0.3s;
-  overflow:hidden;
-}
-.gate-btn::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:rgba(255,69,0,0.08);
-  transform:scaleX(0);
-  transform-origin:left;
-  transition:transform 0.4s ease;
-}
-.gate-btn:hover::before,.gate-btn:active::before{transform:scaleX(1)}
-.gate-btn:hover{border-color:var(--ember);color:var(--ember);box-shadow:0 0 20px rgba(255,69,0,0.2);}
-
-.gate-sub{
-  font-family:'Cinzel',serif;
-  font-size:0.4rem;
-  letter-spacing:0.5em;
-  color:rgba(255,69,0,0.25);
-  text-transform:uppercase;
-}
-
-/* Fire particles on gate */
-.gate-fire{
-  position:absolute;
-  bottom:0;
-  left:0;
-  width:100%;
-  height:30%;
-  background:linear-gradient(to top,rgba(255,40,0,0.07),transparent);
-  pointer-events:none;
-}
-
-/* ============================================================
-   MAIN SCROLL CONTAINER
-   ============================================================ */
-.scroll-container{
-  width:100%;
-  height:100vh;
-  overflow-y:scroll;
-  overflow-x:hidden;
-  scroll-snap-type:y mandatory;
-  scrollbar-width:none;
-  -ms-overflow-style:none;
-}
+/* ── SCROLL CONTAINER ── */
+.scroll-container{width:100%;height:100vh;overflow-y:scroll;overflow-x:hidden;scroll-snap-type:y mandatory;scrollbar-width:none;-ms-overflow-style:none}
 .scroll-container::-webkit-scrollbar{display:none}
 
-.section{
-  position:relative;
-  width:100%;
-  height:100vh;
-  scroll-snap-align:start;
-  scroll-snap-stop:always;
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-shrink:0;
-}
+/* ── SECTION ── */
+.section{position:relative;width:100%;height:100vh;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
-/* VIDEO BACKGROUND */
-.video-bg{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  z-index:0;
-  background:#000;
-}
-.video-bg iframe{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  width:177.78vh;
-  height:100vh;
-  min-width:100%;
-  min-height:56.25vw;
-  border:none;
-  pointer-events:none;
-}
+/* VIDEO BG */
+.video-bg{position:absolute;inset:0;width:100%;height:100%;z-index:0;background:#000}
+.video-bg iframe{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:177.78vh;height:100vh;min-width:100%;min-height:56.25vw;border:none;pointer-events:none}
 
-/* Overlay loading state */
-.video-loading{
-  position:absolute;
-  inset:0;
-  z-index:5;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#000;
-  transition:opacity 2s ease;
-}
-.video-loading.gone{opacity:0;pointer-events:none;}
-.loading-skull{
-  font-size:2rem;
-  opacity:0.3;
-  animation:gatePulse 1.5s ease-in-out infinite;
-}
-
-.video-overlay{
-  position:absolute;
-  inset:0;
-  z-index:2;
-  background:rgba(0,0,0,0.25);
-}
-
-/* CANVAS VISUALIZER */
-.viz-canvas{
-  position:absolute;
-  inset:0;
-  z-index:3;
-  pointer-events:none;
-  opacity:0;
-  transition:opacity 1s;
-}
-.section.active .viz-canvas{opacity:1}
-
-/* SECTION CONTENT */
-.section-content{
-  position:relative;
-  z-index:10;
-  text-align:center;
-  padding:0 1.5rem;
-  pointer-events:none;
-}
-
-/* HERO */
-.hero-section .section-content{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  height:100%;
-}
-.artist-tag{
-  font-family:'Cinzel',serif;
-  font-size:0.6rem;
-  letter-spacing:0.8em;
-  color:rgba(255,69,0,0.6);
-  text-transform:uppercase;
-  margin-bottom:1rem;
-  opacity:0;
-  animation:fadeUp 1s 0.5s forwards;
-}
-.artist-name{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(4rem,22vw,9rem);
-  line-height:0.85;
-  letter-spacing:0.05em;
-  color:#fff;
-  opacity:0;
-  animation:fadeUp 1s 0.8s forwards;
-  text-shadow:0 0 60px rgba(255,69,0,0.3);
-}
-.artist-name span{
-  display:block;
-  font-family:'Cinzel Decorative',serif;
-  font-size:clamp(1.5rem,8vw,3.5rem);
-  color:var(--ember);
-  letter-spacing:0.3em;
-  font-weight:400;
-  line-height:1.5;
-  text-shadow:0 0 30px rgba(255,69,0,0.5);
-}
-.hero-divider{
-  display:flex;
-  align-items:center;
-  gap:1rem;
-  margin:1.5rem 0;
-  opacity:0;
-  animation:fadeUp 1s 1.2s forwards;
-}
-.hdl{width:50px;height:1px;background:linear-gradient(to right,transparent,var(--ember))}
-.hdl.r{background:linear-gradient(to left,transparent,var(--ember))}
-.hds{color:var(--gold);font-size:1rem}
-.hero-sub{
-  font-family:'Cinzel',serif;
-  font-size:0.55rem;
-  letter-spacing:0.5em;
-  color:rgba(255,255,255,0.2);
-  text-transform:uppercase;
-  opacity:0;
-  animation:fadeUp 1s 1.5s forwards;
-}
-.scroll-hint{
-  position:absolute;
-  bottom:2.5rem;
-  left:50%;
-  transform:translateX(-50%);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:0.5rem;
-  z-index:10;
-  opacity:0;
-  animation:fadeUp 1s 2s forwards;
-  pointer-events:none;
-}
-.scroll-hint-txt{
-  font-family:'Cinzel',serif;
-  font-size:0.42rem;
-  letter-spacing:0.5em;
-  color:rgba(255,69,0,0.35);
-  text-transform:uppercase;
-}
-.scroll-hint-arrow{
-  color:rgba(255,69,0,0.35);
-  font-size:1.2rem;
-  animation:bounce 2s ease-in-out infinite;
-}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
-
-/* EDIT SECTIONS */
-.edit-section .section-content{
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  padding:2rem 1.5rem;
-  background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,transparent 100%);
-  pointer-events:none;
-  text-align:left;
-}
-.edit-num{
-  font-family:'Cinzel',serif;
-  font-size:0.45rem;
-  letter-spacing:0.5em;
-  color:rgba(255,69,0,0.4);
-  text-transform:uppercase;
-  margin-bottom:0.3rem;
-}
-.edit-title{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(2.5rem,10vw,4rem);
-  color:#fff;
-  letter-spacing:0.08em;
-  line-height:1;
-  text-shadow:0 0 30px rgba(255,69,0,0.3);
-}
-.edit-sub{
-  font-family:'Cinzel',serif;
-  font-size:0.5rem;
-  letter-spacing:0.3em;
-  color:rgba(255,69,0,0.5);
-  text-transform:uppercase;
-  margin-top:0.3rem;
-}
+/* Overlay */
+.video-overlay{position:absolute;inset:0;z-index:2;background:rgba(0,0,0,.22)}
 
 /* BEAT BORDER */
-.beat-border{
-  position:absolute;
-  inset:0;
-  z-index:4;
-  border:2px solid transparent;
-  transition:border-color 0.05s;
+.beat-border{position:absolute;inset:0;z-index:4;border:2px solid transparent;pointer-events:none}
+.section.active .beat-border{animation:beatB .55s ease-in-out infinite alternate}
+@keyframes beatB{0%{border-color:transparent;box-shadow:none}100%{border-color:rgba(255,69,0,.13);box-shadow:inset 0 0 70px rgba(255,69,0,.05)}}
+
+/* RHYTHM BG PULSE — reacciona al beat simulado */
+.rhythm-bg{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .3s}
+.section.active .rhythm-bg{opacity:1}
+
+/* ── HERO CONTENT ── */
+.hero-corner{
+  position:absolute;top:0;left:0;
+  z-index:10;
+  padding:1.4rem 1.6rem;
+  opacity:0;
+  transform:translateY(-10px);
+  transition:opacity .8s ease,transform .8s ease;
   pointer-events:none;
 }
-.section.active .beat-border{
-  animation:beatBorder 0.5s ease-in-out infinite alternate;
+.hero-corner.show{opacity:1;transform:translateY(0)}
+.hc-tag{font-size:7px;letter-spacing:.6em;color:rgba(255,69,0,.5);text-transform:uppercase;margin-bottom:5px}
+.hc-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,5vw,38px);color:#fff;line-height:.88;letter-spacing:.04em}
+.hc-rivera{font-family:'Cinzel Decorative',serif;font-size:clamp(8px,1.8vw,14px);color:var(--ember);letter-spacing:.35em;display:block;margin-top:4px}
+.hc-div{display:flex;align-items:center;gap:6px;margin:6px 0}
+.hcl{width:24px;height:1px;background:linear-gradient(to right,transparent,var(--ember))}
+.hcr{width:24px;height:1px;background:linear-gradient(to left,transparent,var(--ember))}
+.hcs{color:var(--gold);font-size:9px}
+
+/* HERO CENTER — visible antes del video */
+.hero-center{
+  position:relative;z-index:10;
+  text-align:center;padding:0 1.5rem;
+  pointer-events:none;
+  transition:opacity .8s ease;
 }
-@keyframes beatBorder{
-  0%{border-color:transparent;box-shadow:none}
-  100%{border-color:rgba(255,69,0,0.15);box-shadow:inset 0 0 60px rgba(255,69,0,0.06)}
-}
+.hero-center.hide{opacity:0}
+.artist-tag{font-size:.6rem;letter-spacing:.8em;color:rgba(255,69,0,.6);text-transform:uppercase;margin-bottom:1rem;animation:fadeUp 1s .4s both}
+.artist-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,22vw,9rem);line-height:.85;letter-spacing:.05em;color:#fff;animation:fadeUp 1s .7s both;text-shadow:0 0 60px rgba(255,69,0,.25)}
+.artist-name span{display:block;font-family:'Cinzel Decorative',serif;font-size:clamp(1.4rem,7vw,3.2rem);color:var(--ember);letter-spacing:.3em;font-weight:400;line-height:1.5}
+.hero-div{display:flex;align-items:center;gap:1rem;margin:1.4rem 0;justify-content:center;animation:fadeUp 1s 1.1s both}
+.hdl{width:44px;height:1px;background:linear-gradient(to right,transparent,var(--ember))}
+.hdl.r{background:linear-gradient(to left,transparent,var(--ember))}
+.hero-sub{font-size:.52rem;letter-spacing:.5em;color:rgba(255,255,255,.18);text-transform:uppercase;animation:fadeUp 1s 1.4s both}
+
+/* SCROLL HINT */
+.scroll-hint{position:absolute;bottom:2.2rem;left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:.4rem;pointer-events:none;animation:fadeUp 1s 2s both}
+.sh-arrow{color:rgba(255,69,0,.3);font-size:1.2rem;animation:bounce 2s ease-in-out infinite}
+.sh-txt{font-size:.4rem;letter-spacing:.5em;color:rgba(255,69,0,.25);text-transform:uppercase}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+
+/* ── EDIT SECTIONS ── */
+.edit-content{position:absolute;bottom:0;left:0;right:0;z-index:10;padding:1.8rem 1.6rem;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,transparent 100%);pointer-events:none}
+.edit-num{font-size:.42rem;letter-spacing:.5em;color:rgba(255,69,0,.38);text-transform:uppercase;margin-bottom:.3rem}
+.edit-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,9vw,3.8rem);color:#fff;letter-spacing:.07em;line-height:1;text-shadow:0 0 30px rgba(255,69,0,.25)}
+.edit-sub{font-size:.46rem;letter-spacing:.28em;color:rgba(255,69,0,.48);text-transform:uppercase;margin-top:.3rem}
 
 /* PROGRESS DOTS */
-.progress-dots{
-  position:fixed;
-  right:1.5rem;
-  top:50%;
-  transform:translateY(-50%);
-  z-index:100;
-  display:flex;
-  flex-direction:column;
-  gap:0.8rem;
-}
-.pdot{
-  width:5px;
-  height:5px;
-  border-radius:50%;
-  background:rgba(255,255,255,0.15);
-  transition:all 0.3s;
-  cursor:pointer;
-}
-.pdot.active{
-  background:var(--ember);
-  box-shadow:0 0 8px var(--ember);
-  transform:scale(1.4);
-}
+.progress-dots{position:fixed;right:1.3rem;top:50%;transform:translateY(-50%);z-index:200;display:flex;flex-direction:column;gap:.75rem}
+.pdot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.13);transition:all .3s;cursor:pointer}
+.pdot.active{background:var(--ember);box-shadow:0 0 7px var(--ember);transform:scale(1.5)}
 
-/* EMBER PARTICLES */
-.ember{
-  position:fixed;
-  pointer-events:none;
-  z-index:5;
-  border-radius:50%;
-  animation:emberRise linear forwards;
-}
-@keyframes emberRise{
-  0%{opacity:0.8;transform:translateY(0) translateX(0)}
-  100%{opacity:0;transform:translateY(-150px) translateX(var(--dx))}
-}
+/* CANVAS VISUALIZER */
+.viz-canvas{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity 1s}
+.section.active .viz-canvas{opacity:1}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 
 <div class="cursor" id="cursor"></div>
 
-<!-- ============================================================
+<!-- ═══════════════════════════════════
      ENTER GATE
-     ============================================================ -->
-<div id="enterGate">
+════════════════════════════════════ -->
+<div id="gate">
+  <div class="gate-scan"></div>
   <div class="gate-fire"></div>
-  <div class="gate-skull">💀</div>
-  <div class="gate-title">
-    JT RIVERA
-    <span>HADES</span>
-  </div>
+  <div class="gate-ring"><div class="gate-skull">💀</div></div>
+  <div class="gate-title">JT RIVERA<span class="gate-name">HADES</span></div>
   <button class="gate-btn" id="enterBtn">☽ Enter the Underworld ☾</button>
-  <div class="gate-sub">Sound On · Full Screen Recommended</div>
+  <div class="gate-hint">Sound On &nbsp;·&nbsp; Full Screen Recommended</div>
 </div>
 
 <!-- PROGRESS DOTS -->
 <div class="progress-dots" id="progressDots">
-  <div class="pdot active" onclick="goToSection(0)"></div>
-  <div class="pdot" onclick="goToSection(1)"></div>
-  <div class="pdot" onclick="goToSection(2)"></div>
-  <div class="pdot" onclick="goToSection(3)"></div>
-  <div class="pdot" onclick="goToSection(4)"></div>
+  <div class="pdot active" onclick="goTo(0)"></div>
+  <div class="pdot" onclick="goTo(1)"></div>
+  <div class="pdot" onclick="goTo(2)"></div>
+  <div class="pdot" onclick="goTo(3)"></div>
 </div>
 
-<!-- SCROLL CONTAINER -->
+<!-- ═══════════════════════════════════
+     SCROLL CONTAINER
+════════════════════════════════════ -->
 <div class="scroll-container" id="scrollContainer">
 
-  <!-- SECTION 1: HERO -->
+  <!-- SECTION 0: HERO — Café Oro -->
   <div class="section hero-section active" id="section-0">
-    <div class="video-bg">
-      <!-- iframe se inyecta por JS después del gate -->
-      <div id="video-slot-0"></div>
-    </div>
-    <div class="video-loading" id="loading-0"><div class="loading-skull">💀</div></div>
-    <div class="video-overlay"></div>
+    <div class="video-bg"><div id="yt-0"></div></div>
     <canvas class="viz-canvas" id="viz-0"></canvas>
+    <div class="video-overlay"></div>
     <div class="beat-border"></div>
-    <div class="section-content">
+
+    <!-- Nombre pequeño esquina (aparece cuando arranca el video) -->
+    <div class="hero-corner" id="heroCorner">
+      <div class="hc-tag">☽ The Underworld Speaks ☾</div>
+      <div class="hc-name">JT<span class="hc-rivera">RIVERA</span></div>
+      <div class="hc-div"><div class="hcl"></div><div class="hcs">💀</div><div class="hcr"></div></div>
+    </div>
+
+    <!-- Nombre grande centro (visible antes del video) -->
+    <div class="hero-center" id="heroCenter">
       <div class="artist-tag">☽ The Underworld Speaks ☾</div>
-      <div class="artist-name">
-        JT<br>
-        <span>RIVERA</span>
-      </div>
-      <div class="hero-divider">
-        <div class="hdl"></div>
-        <div class="hds">💀</div>
-        <div class="hdl r"></div>
-      </div>
+      <div class="artist-name">JT<br><span>RIVERA</span></div>
+      <div class="hero-div"><div class="hdl"></div><span style="color:var(--gold)">💀</span><div class="hdl r"></div></div>
       <div class="hero-sub">Music · Edits · Darkness</div>
     </div>
+
     <div class="scroll-hint">
-      <div class="scroll-hint-arrow">↓</div>
-      <div class="scroll-hint-txt">Descend</div>
+      <div class="sh-arrow">↓</div>
+      <div class="sh-txt">Descend</div>
     </div>
   </div>
 
-  <!-- SECTION 2 -->
+  <!-- SECTION 1: Edit I -->
   <div class="section edit-section" id="section-1">
-    <div class="video-bg"><div id="video-slot-1"></div></div>
-    <div class="video-loading" id="loading-1"><div class="loading-skull">💀</div></div>
-    <div class="video-overlay"></div>
+    <div class="video-bg"><div id="yt-1"></div></div>
     <canvas class="viz-canvas" id="viz-1"></canvas>
+    <div class="video-overlay"></div>
     <div class="beat-border"></div>
-    <div class="section-content">
+    <div class="edit-content">
       <div class="edit-num">Edit I — The Descent</div>
       <div class="edit-title">HADES</div>
       <div class="edit-sub">☽ Lord of the Underworld ☾</div>
     </div>
   </div>
 
-  <!-- SECTION 3 -->
+  <!-- SECTION 2: Edit II -->
   <div class="section edit-section" id="section-2">
-    <div class="video-bg"><div id="video-slot-2"></div></div>
-    <div class="video-loading" id="loading-2"><div class="loading-skull">💀</div></div>
-    <div class="video-overlay"></div>
+    <div class="video-bg"><div id="yt-2"></div></div>
     <canvas class="viz-canvas" id="viz-2"></canvas>
+    <div class="video-overlay"></div>
     <div class="beat-border"></div>
-    <div class="section-content">
+    <div class="edit-content">
       <div class="edit-num">Edit II — The River Styx</div>
       <div class="edit-title">DARKNESS</div>
       <div class="edit-sub">☽ Where souls cross ☾</div>
     </div>
   </div>
 
-  <!-- SECTION 4 -->
+  <!-- SECTION 3: Edit III -->
   <div class="section edit-section" id="section-3">
-    <div class="video-bg"><div id="video-slot-3"></div></div>
-    <div class="video-loading" id="loading-3"><div class="loading-skull">💀</div></div>
-    <div class="video-overlay"></div>
+    <div class="video-bg"><div id="yt-3"></div></div>
     <canvas class="viz-canvas" id="viz-3"></canvas>
+    <div class="video-overlay"></div>
     <div class="beat-border"></div>
-    <div class="section-content">
+    <div class="edit-content">
       <div class="edit-num">Edit III — Tartarus</div>
       <div class="edit-title">ETERNAL</div>
       <div class="edit-sub">☽ No escape from the deep ☾</div>
     </div>
   </div>
 
-  <!-- SECTION 5 -->
-  <div class="section edit-section" id="section-4">
-    <div class="video-bg"><div id="video-slot-4"></div></div>
-    <div class="video-loading" id="loading-4"><div class="loading-skull">💀</div></div>
-    <div class="video-overlay"></div>
-    <canvas class="viz-canvas" id="viz-4"></canvas>
-    <div class="beat-border"></div>
-    <div class="section-content">
-      <div class="edit-num">Edit IV — The Throne</div>
-      <div class="edit-title">HADES 66</div>
-      <div class="edit-sub">☽ JT.RIVERA ☾</div>
-    </div>
-  </div>
-
 </div>
 
+<!-- YouTube IFrame API -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <script>
-// ─── IDs de Google Drive ───────────────────────────────────────────────
-const VIDEO_IDS = [
-  '12zNz42wMDBP7U2PIRtiGJTb5wp54mRa4',
-  '11nU9rMVzRsKYv__YBvsmuCUodBOOC0dQ',
-  '1tSBddn3QUmLqA7nVH-azVgRE3Trn7kwL',
-  '1U5c2Hxuh9EEI5lBLH0dQZgXLRcOP-5g4',
-  '1ZVxY7dgAS8Sz0hRjCbKYBcXrcpONjkdB'
+// ─── CONFIG ───────────────────────────────────────────────────────────
+const VIDEOS = [
+  { id: 'KKZoiYF6sv4', type: 'normal' },   // Café Oro — hero
+  { id: 'xWf0KQ7ZXug', type: 'short' },   // Edit I
+  { id: '5W_En0p_ENA', type: 'short' },   // Edit II
+  { id: 'CgOu_C-jmFw', type: 'short' },   // Edit III
 ];
 
-// ─── Estado global ─────────────────────────────────────────────────────
-let unlocked = false;
-let currentSection = 0;
-const iframes = {}; // idx → iframe element
+// ─── STATE ────────────────────────────────────────────────────────────
+let unlocked     = false;
+let currentIdx   = 0;
+let players      = {};   // idx → YT.Player
+let apiReady     = false;
+let heroStarted  = false;
 
-// ─── CURSOR ────────────────────────────────────────────────────────────
-const cursor = document.getElementById('cursor');
+// ─── CURSOR ───────────────────────────────────────────────────────────
+const cursorEl = document.getElementById('cursor');
 document.addEventListener('mousemove', e => {
-  cursor.style.left = e.clientX + 'px';
-  cursor.style.top  = e.clientY + 'px';
+  cursorEl.style.left = e.clientX + 'px';
+  cursorEl.style.top  = e.clientY + 'px';
   spawnEmber(e.clientX, e.clientY);
 });
-
 function spawnEmber(x, y) {
-  if (Math.random() > 0.08) return;
+  if (Math.random() > .07) return;
   const el = document.createElement('div');
-  el.className = 'ember';
+  el.className = 'ember-p';
   const s  = Math.random() * 3 + 1;
-  const dx = (Math.random() - 0.5) * 60;
-  el.style.cssText = `left:${x}px;top:${y}px;width:${s}px;height:${s}px;background:hsl(${Math.random()*30+5},100%,60%);--dx:${dx}px;animation-duration:${Math.random()*1+0.6}s`;
+  const dx = (Math.random() - .5) * 60;
+  el.style.cssText = `left:${x}px;top:${y}px;width:${s}px;height:${s}px;background:hsl(${Math.random()*28+5},100%,60%);--dx:${dx}px;animation-duration:${Math.random()*.9+.5}s`;
   document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1600);
+  setTimeout(() => el.remove(), 1500);
 }
 
-// ─── CREAR IFRAME para un slot ─────────────────────────────────────────
-function createIframe(idx) {
-  if (iframes[idx]) return; // ya existe
+// ─── YOUTUBE API READY ────────────────────────────────────────────────
+function onYouTubeIframeAPIReady() {
+  apiReady = true;
+  if (unlocked) createPlayer(0);
+}
 
-  const slot = document.getElementById(`video-slot-${idx}`);
-  if (!slot) return;
+function createPlayer(idx) {
+  if (players[idx] || !apiReady) return;
+  const div = document.getElementById(`yt-${idx}`);
+  if (!div) return;
 
-  const iframe = document.createElement('iframe');
-  // autoplay=1 funciona porque ya hubo interacción del usuario (click en Enter)
-  iframe.src = `https://drive.google.com/file/d/${VIDEO_IDS[idx]}/preview?autoplay=1&mute=0`;
-  iframe.allow = 'autoplay; fullscreen';
-  iframe.allowFullscreen = true;
-  iframe.style.cssText = `
-    position:absolute;top:50%;left:50%;
-    transform:translate(-50%,-50%);
-    width:177.78vh;height:100vh;
-    min-width:100%;min-height:56.25vw;
-    border:none;pointer-events:none;
-  `;
-
-  // Ocultar loading overlay cuando el iframe cargue
-  iframe.onload = () => {
-    const loading = document.getElementById(`loading-${idx}`);
-    if (loading) loading.classList.add('gone');
+  // Dimensiones del iframe para cubrir pantalla completa
+  const playerVars = {
+    autoplay:       1,
+    mute:           0,
+    controls:       0,
+    loop:           1,
+    playlist:       VIDEOS[idx].id,
+    modestbranding: 1,
+    rel:            0,
+    showinfo:       0,
+    iv_load_policy: 3,
+    enablejsapi:    1,
+    origin:         location.origin,
+    playsinline:    1,
   };
 
-  slot.appendChild(iframe);
-  iframes[idx] = iframe;
+  players[idx] = new YT.Player(div, {
+    videoId: VIDEOS[idx].id,
+    playerVars,
+    events: {
+      onReady(e) {
+        e.target.setVolume(85);
+        if (idx === currentIdx) {
+          e.target.playVideo();
+          if (idx === 0) showHeroCorner();
+        }
+      },
+      onStateChange(e) {
+        // Si termina (estado 0) vuelve a reproducir — loop manual para Shorts
+        if (e.data === YT.PlayerState.ENDED) {
+          e.target.seekTo(0);
+          e.target.playVideo();
+        }
+      }
+    }
+  });
+
+  // Hacer el iframe full-cover
+  setTimeout(() => {
+    const iframe = div.querySelector('iframe');
+    if (iframe) {
+      iframe.style.cssText = `
+        position:absolute;top:50%;left:50%;
+        transform:translate(-50%,-50%);
+        width:177.78vh;height:100vh;
+        min-width:100%;min-height:56.25vw;
+        border:none;pointer-events:none;
+      `;
+    }
+  }, 800);
 }
 
-// ─── ENTER GATE ────────────────────────────────────────────────────────
+function showHeroCorner() {
+  if (heroStarted) return;
+  heroStarted = true;
+  document.getElementById('heroCenter').classList.add('hide');
+  setTimeout(() => {
+    document.getElementById('heroCorner').classList.add('show');
+  }, 600);
+}
+
+// ─── ENTER GATE ───────────────────────────────────────────────────────
 document.getElementById('enterBtn').addEventListener('click', () => {
   unlocked = true;
-
-  // Ocultar gate
-  document.getElementById('enterGate').classList.add('hidden');
-
-  // Cargar sección 0 inmediatamente (con autoplay + sonido)
-  createIframe(0);
-
-  // Pre-cargar la siguiente en silencio
-  setTimeout(() => createIframe(1), 3000);
+  document.getElementById('gate').classList.add('gone');
+  if (apiReady) createPlayer(0);
+  // Pre-cargar el siguiente
+  setTimeout(() => createPlayer(1), 4000);
 });
 
-// ─── VISUALIZER ────────────────────────────────────────────────────────
+// ─── VISUALIZER ───────────────────────────────────────────────────────
 const sections   = document.querySelectorAll('.section');
 const dots       = document.querySelectorAll('.pdot');
-const vizCanvases = {};
+const vizData    = {};
 
 sections.forEach((sec, i) => {
   const canvas = document.getElementById(`viz-${i}`);
   if (!canvas) return;
   canvas.width  = window.innerWidth;
   canvas.height = window.innerHeight;
-  vizCanvases[i] = {
-    canvas,
-    ctx: canvas.getContext('2d'),
-    active: false,
-    bars: Array.from({ length: 80 }, () => ({
-      height: Math.random() * 0.3 + 0.05,
-      target: Math.random() * 0.3 + 0.05,
-      speed:  Math.random() * 0.05 + 0.02
-    }))
+  vizData[i] = {
+    canvas, ctx: canvas.getContext('2d'), active: false,
+    bars: Array.from({ length: 90 }, () => ({
+      h: Math.random() * .25 + .04,
+      target: Math.random() * .25 + .04,
+      speed: Math.random() * .055 + .018,
+      phase: Math.random() * Math.PI * 2,
+    })),
+    time: 0
   };
 });
 
 window.addEventListener('resize', () => {
-  sections.forEach((sec, i) => {
+  sections.forEach((_, i) => {
     const c = document.getElementById(`viz-${i}`);
     if (c) { c.width = window.innerWidth; c.height = window.innerHeight; }
   });
@@ -611,28 +375,37 @@ window.addEventListener('resize', () => {
 
 function animateViz() {
   requestAnimationFrame(animateViz);
-  Object.values(vizCanvases).forEach(v => {
+  Object.values(vizData).forEach(v => {
     if (!v.active) return;
-    const { ctx, canvas, bars } = v;
+    v.time += .018;
+    const { ctx, canvas, bars, time } = v;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const bw = canvas.width / bars.length;
+
     bars.forEach((bar, i) => {
-      if (Math.random() < 0.03) bar.target = Math.random() * 0.8 + 0.1;
-      bar.height += (bar.target - bar.height) * bar.speed;
-      bar.target *= 0.995;
-      if (bar.target < 0.05) bar.target = Math.random() * 0.4 + 0.05;
-      const h     = bar.height * canvas.height * 0.35;
+      // Beat simulado — ondas sinusoidales con variación aleatoria
+      const beat = Math.sin(time * 3.2 + bar.phase) * .18 + Math.sin(time * 7 + i * .15) * .09;
+      if (Math.random() < .025) bar.target = Math.abs(beat) + Math.random() * .5 + .05;
+      bar.h += (bar.target - bar.h) * bar.speed;
+      bar.target *= .97;
+      if (bar.target < .04) bar.target = Math.random() * .35 + .05;
+
+      const h     = bar.h * canvas.height * .38;
       const x     = i * bw;
       const y     = canvas.height - h;
-      const alpha = bar.height * 0.25;
-      const grad  = ctx.createLinearGradient(0, y, 0, canvas.height);
-      grad.addColorStop(0, `rgba(255,100,0,${alpha})`);
-      grad.addColorStop(1, `rgba(255,30,0,${alpha * 0.2})`);
+      const alpha = bar.h * .22;
+
+      const grad = ctx.createLinearGradient(0, y, 0, canvas.height);
+      grad.addColorStop(0, `rgba(255,90,0,${alpha})`);
+      grad.addColorStop(1, `rgba(255,20,0,${alpha * .15})`);
       ctx.fillStyle = grad;
       ctx.fillRect(x, y, bw - 1, h);
     });
-    const cg = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width * 0.5);
-    cg.addColorStop(0, 'rgba(255,50,0,0.04)');
+
+    // Pulso central al ritmo
+    const pulse = Math.abs(Math.sin(v.time * 3.2)) * .06;
+    const cg = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width * .5);
+    cg.addColorStop(0, `rgba(255,50,0,${pulse})`);
     cg.addColorStop(1, 'transparent');
     ctx.fillStyle = cg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -640,54 +413,71 @@ function animateViz() {
 }
 animateViz();
 
-// ─── ACTIVAR SECCIÓN ───────────────────────────────────────────────────
+// ─── ACTIVAR SECCIÓN ──────────────────────────────────────────────────
 function activateSection(idx) {
+  // Pausar todos los demás
+  Object.entries(players).forEach(([i, p]) => {
+    if (parseInt(i) !== idx) {
+      try { p.pauseVideo(); } catch(e) {}
+    }
+  });
+
   sections.forEach((s, i) => {
     s.classList.toggle('active', i === idx);
-    if (vizCanvases[i]) vizCanvases[i].active = (i === idx);
+    if (vizData[i]) vizData[i].active = (i === idx);
   });
   dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-  currentSection = idx;
+  currentIdx = idx;
 
-  // Cargar el video de esta sección si está desbloqueado
   if (unlocked) {
-    createIframe(idx);
-    // Pre-cargar la siguiente
-    if (idx + 1 < VIDEO_IDS.length) {
-      setTimeout(() => createIframe(idx + 1), 2000);
+    // Reproducir el actual
+    if (players[idx]) {
+      try {
+        players[idx].seekTo(0);
+        players[idx].playVideo();
+        if (idx === 0 && !heroStarted) showHeroCorner();
+      } catch(e) {}
+    } else {
+      createPlayer(idx);
+    }
+    // Pre-cargar el siguiente
+    if (idx + 1 < VIDEOS.length) {
+      setTimeout(() => createPlayer(idx + 1), 2000);
     }
   }
 }
 
-// ─── SCROLL ────────────────────────────────────────────────────────────
+// ─── SCROLL ───────────────────────────────────────────────────────────
 const container = document.getElementById('scrollContainer');
+let lastIdx = 0;
 container.addEventListener('scroll', () => {
   const idx = Math.round(container.scrollTop / window.innerHeight);
-  if (idx !== currentSection) activateSection(idx);
-}, { passive: true });
-
-// ─── NAVEGACIÓN ────────────────────────────────────────────────────────
-function goToSection(idx) {
-  container.scrollTo({ top: idx * window.innerHeight, behavior: 'smooth' });
-  activateSection(idx);
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowDown' && currentSection < sections.length - 1) goToSection(currentSection + 1);
-  if (e.key === 'ArrowUp'   && currentSection > 0)                   goToSection(currentSection - 1);
-});
-
-let touchStartY = 0;
-container.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
-container.addEventListener('touchend', e => {
-  const diff = touchStartY - e.changedTouches[0].clientY;
-  if (Math.abs(diff) > 50) {
-    if (diff > 0 && currentSection < sections.length - 1) goToSection(currentSection + 1);
-    else if (diff < 0 && currentSection > 0)              goToSection(currentSection - 1);
+  if (idx !== lastIdx) {
+    lastIdx = idx;
+    activateSection(idx);
   }
 }, { passive: true });
 
-// ─── INIT ──────────────────────────────────────────────────────────────
+// ─── NAVEGACIÓN ───────────────────────────────────────────────────────
+function goTo(idx) {
+  container.scrollTo({ top: idx * window.innerHeight, behavior: 'smooth' });
+  activateSection(idx);
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' && currentIdx < sections.length - 1) goTo(currentIdx + 1);
+  if (e.key === 'ArrowUp'   && currentIdx > 0)                   goTo(currentIdx - 1);
+});
+let touchY = 0;
+container.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
+container.addEventListener('touchend', e => {
+  const d = touchY - e.changedTouches[0].clientY;
+  if (Math.abs(d) > 45) {
+    if (d > 0 && currentIdx < sections.length - 1) goTo(currentIdx + 1);
+    else if (d < 0 && currentIdx > 0) goTo(currentIdx - 1);
+  }
+}, { passive: true });
+
+// ─── INIT ─────────────────────────────────────────────────────────────
 activateSection(0);
 </script>
 </body>
