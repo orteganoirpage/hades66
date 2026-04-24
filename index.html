@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>JT.RIVERA — HADES</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --black:#000;
+  --ember:#ff4500;
+  --ember2:#ff6a00;
+  --gold:#c8973a;
+  --gold2:#ffd700;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:#000}
+body{font-family:'Cinzel',serif;cursor:none;overscroll-behavior:none}
+
+/* CURSOR — desktop only */
+.cursor{position:fixed;width:10px;height:10px;background:var(--ember);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;filter:blur(1px);transition:transform 0.05s}
+@media(max-width:768px){.cursor{display:none}}
+
+/* MAIN SCROLL CONTAINER */
+.scroll-container{
+  width:100%;
+  height:100vh;
+  overflow-y:scroll;
+  overflow-x:hidden;
+  scroll-snap-type:y mandatory;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.scroll-container::-webkit-scrollbar{display:none}
+
+/* EACH SECTION = FULL SCREEN */
+.section{
+  position:relative;
+  width:100%;
+  height:100vh;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+/* VIDEO BACKGROUND */
+.video-bg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:0;
+  background:#000;
+}
+.video-bg iframe{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:177.78vh; /* 16:9 aspect */
+  height:100vh;
+  min-width:100%;
+  min-height:56.25vw;
+  border:none;
+  pointer-events:none;
+}
+
+/* OVERLAY ON VIDEOS */
+.video-overlay{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  background:rgba(0,0,0,0.25);
+}
+
+/* CANVAS for audio visualizer effect */
+.viz-canvas{
+  position:absolute;
+  inset:0;
+  z-index:3;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 1s;
+}
+.section.active .viz-canvas{opacity:1}
+
+/* SECTION CONTENT */
+.section-content{
+  position:relative;
+  z-index:10;
+  text-align:center;
+  padding:0 1.5rem;
+  pointer-events:none;
+}
+
+/* HERO SECTION */
+.hero-section .section-content{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:100%;
+}
+.artist-tag{
+  font-family:'Cinzel',serif;
+  font-size:0.6rem;
+  letter-spacing:0.8em;
+  color:rgba(255,69,0,0.6);
+  text-transform:uppercase;
+  margin-bottom:1rem;
+  opacity:0;
+  animation:fadeUp 1s 0.5s forwards;
+}
+.artist-name{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(4rem,22vw,9rem);
+  line-height:0.85;
+  letter-spacing:0.05em;
+  color:#fff;
+  opacity:0;
+  animation:fadeUp 1s 0.8s forwards;
+  text-shadow:0 0 60px rgba(255,69,0,0.3);
+}
+.artist-name span{
+  display:block;
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(1.5rem,8vw,3.5rem);
+  color:var(--ember);
+  letter-spacing:0.3em;
+  font-weight:400;
+  line-height:1.5;
+  text-shadow:0 0 30px rgba(255,69,0,0.5);
+}
+.hero-divider{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  margin:1.5rem 0;
+  opacity:0;
+  animation:fadeUp 1s 1.2s forwards;
+}
+.hdl{width:50px;height:1px;background:linear-gradient(to right,transparent,var(--ember))}
+.hdl.r{background:linear-gradient(to left,transparent,var(--ember))}
+.hds{color:var(--gold);font-size:1rem}
+.hero-sub{
+  font-family:'Cinzel',serif;
+  font-size:0.55rem;
+  letter-spacing:0.5em;
+  color:rgba(255,255,255,0.2);
+  text-transform:uppercase;
+  opacity:0;
+  animation:fadeUp 1s 1.5s forwards;
+}
+.scroll-hint{
+  position:absolute;
+  bottom:2.5rem;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0.5rem;
+  z-index:10;
+  opacity:0;
+  animation:fadeUp 1s 2s forwards;
+  pointer-events:none;
+}
+.scroll-hint-txt{
+  font-family:'Cinzel',serif;
+  font-size:0.42rem;
+  letter-spacing:0.5em;
+  color:rgba(255,69,0,0.35);
+  text-transform:uppercase;
+}
+.scroll-hint-arrow{
+  color:rgba(255,69,0,0.35);
+  font-size:1.2rem;
+  animation:bounce 2s ease-in-out infinite;
+}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* EDIT SECTIONS */
+.edit-section .section-content{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  padding:2rem 1.5rem;
+  background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,transparent 100%);
+  pointer-events:none;
+  text-align:left;
+}
+.edit-num{
+  font-family:'Cinzel',serif;
+  font-size:0.45rem;
+  letter-spacing:0.5em;
+  color:rgba(255,69,0,0.4);
+  text-transform:uppercase;
+  margin-bottom:0.3rem;
+}
+.edit-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2.5rem,10vw,4rem);
+  color:#fff;
+  letter-spacing:0.08em;
+  line-height:1;
+  text-shadow:0 0 30px rgba(255,69,0,0.3);
+}
+.edit-sub{
+  font-family:'Cinzel',serif;
+  font-size:0.5rem;
+  letter-spacing:0.3em;
+  color:rgba(255,69,0,0.5);
+  text-transform:uppercase;
+  margin-top:0.3rem;
+}
+
+/* BEAT PULSE BORDER */
+.beat-border{
+  position:absolute;
+  inset:0;
+  z-index:4;
+  border:2px solid transparent;
+  transition:border-color 0.05s;
+  pointer-events:none;
+}
+.section.active .beat-border{
+  animation:beatBorder 0.5s ease-in-out infinite alternate;
+}
+@keyframes beatBorder{
+  0%{border-color:transparent;box-shadow:none}
+  100%{border-color:rgba(255,69,0,0.15);box-shadow:inset 0 0 60px rgba(255,69,0,0.06)}
+}
+
+/* PROGRESS DOTS */
+.progress-dots{
+  position:fixed;
+  right:1.5rem;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:100;
+  display:flex;
+  flex-direction:column;
+  gap:0.8rem;
+}
+.pdot{
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.15);
+  transition:all 0.3s;
+  cursor:pointer;
+}
+.pdot.active{
+  background:var(--ember);
+  box-shadow:0 0 8px var(--ember);
+  transform:scale(1.4);
+}
+
+/* EMBER PARTICLES */
+.ember{
+  position:fixed;
+  pointer-events:none;
+  z-index:5;
+  border-radius:50%;
+  animation:emberRise linear forwards;
+}
+@keyframes emberRise{
+  0%{opacity:0.8;transform:translateY(0) translateX(0)}
+  100%{opacity:0;transform:translateY(-150px) translateX(var(--dx))}
+}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glitch{
+  0%,100%{clip-path:none;transform:none}
+  20%{clip-path:polygon(0 15%,100% 15%,100% 30%,0 30%);transform:translate(-3px,0)}
+  40%{clip-path:polygon(0 60%,100% 60%,100% 75%,0 75%);transform:translate(3px,0)}
+  60%{clip-path:none;transform:none}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- PROGRESS DOTS -->
+<div class="progress-dots" id="progressDots">
+  <div class="pdot active" onclick="goToSection(0)"></div>
+  <div class="pdot" onclick="goToSection(1)"></div>
+  <div class="pdot" onclick="goToSection(2)"></div>
+  <div class="pdot" onclick="goToSection(3)"></div>
+  <div class="pdot" onclick="goToSection(4)"></div>
+</div>
+
+<!-- SCROLL CONTAINER -->
+<div class="scroll-container" id="scrollContainer">
+
+  <!-- SECTION 1: HERO — CAFÉ ORO -->
+  <div class="section hero-section active" id="section-0">
+    <div class="video-bg">
+      <iframe
+        id="iframe-0"
+        src="https://drive.google.com/file/d/12zNz42wMDBP7U2PIRtiGJTb5wp54mRa4/preview?autoplay=1&mute=0&loop=1"
+        allow="autoplay; fullscreen"
+        allowfullscreen>
+      </iframe>
+    </div>
+    <div class="video-overlay"></div>
+    <canvas class="viz-canvas" id="viz-0"></canvas>
+    <div class="beat-border"></div>
+    <div class="section-content">
+      <div class="artist-tag">☽ The Underworld Speaks ☾</div>
+      <div class="artist-name">
+        JT<br>
+        <span>RIVERA</span>
+      </div>
+      <div class="hero-divider">
+        <div class="hdl"></div>
+        <div class="hds">💀</div>
+        <div class="hdl r"></div>
+      </div>
+      <div class="hero-sub">Music · Edits · Darkness</div>
+    </div>
+    <div class="scroll-hint">
+      <div class="scroll-hint-arrow">↓</div>
+      <div class="scroll-hint-txt">Descend</div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: HADES EDIT 1 -->
+  <div class="section edit-section" id="section-1">
+    <div class="video-bg">
+      <iframe
+        id="iframe-1"
+        src="https://drive.google.com/file/d/11nU9rMVzRsKYv__YBvsmuCUodBOOC0dQ/preview?autoplay=0&mute=0&loop=1"
+        allow="autoplay; fullscreen"
+        allowfullscreen>
+      </iframe>
+    </div>
+    <div class="video-overlay"></div>
+    <canvas class="viz-canvas" id="viz-1"></canvas>
+    <div class="beat-border"></div>
+    <div class="section-content">
+      <div class="edit-num">Edit I — The Descent</div>
+      <div class="edit-title">HADES</div>
+      <div class="edit-sub">☽ Lord of the Underworld ☾</div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: HADES EDIT 2 -->
+  <div class="section edit-section" id="section-2">
+    <div class="video-bg">
+      <iframe
+        id="iframe-2"
+        src="https://drive.google.com/file/d/1tSBddn3QUmLqA7nVH-azVgRE3Trn7kwL/preview?autoplay=0&mute=0&loop=1"
+        allow="autoplay; fullscreen"
+        allowfullscreen>
+      </iframe>
+    </div>
+    <div class="video-overlay"></div>
+    <canvas class="viz-canvas" id="viz-2"></canvas>
+    <div class="beat-border"></div>
+    <div class="section-content">
+      <div class="edit-num">Edit II — The River Styx</div>
+      <div class="edit-title">DARKNESS</div>
+      <div class="edit-sub">☽ Where souls cross ☾</div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: HADES EDIT 3 -->
+  <div class="section edit-section" id="section-3">
+    <div class="video-bg">
+      <iframe
+        id="iframe-3"
+        src="https://drive.google.com/file/d/1U5c2Hxuh9EEI5lBLH0dQZgXLRcOP-5g4/preview?autoplay=0&mute=0&loop=1"
+        allow="autoplay; fullscreen"
+        allowfullscreen>
+      </iframe>
+    </div>
+    <div class="video-overlay"></div>
+    <canvas class="viz-canvas" id="viz-3"></canvas>
+    <div class="beat-border"></div>
+    <div class="section-content">
+      <div class="edit-num">Edit III — Tartarus</div>
+      <div class="edit-title">ETERNAL</div>
+      <div class="edit-sub">☽ No escape from the deep ☾</div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: HADES EDIT 4 -->
+  <div class="section edit-section" id="section-4">
+    <div class="video-bg">
+      <iframe
+        id="iframe-4"
+        src="https://drive.google.com/file/d/1ZVxY7dgAS8Sz0hRjCbKYBcXrcpONjkdB/preview?autoplay=0&mute=0&loop=1"
+        allow="autoplay; fullscreen"
+        allowfullscreen>
+      </iframe>
+    </div>
+    <div class="video-overlay"></div>
+    <canvas class="viz-canvas" id="viz-4"></canvas>
+    <div class="beat-border"></div>
+    <div class="section-content">
+      <div class="edit-num">Edit IV — The Throne</div>
+      <div class="edit-title">HADES 66</div>
+      <div class="edit-sub">☽ JT.RIVERA ☾</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// CURSOR
+const cursor=document.getElementById('cursor');
+document.addEventListener('mousemove',e=>{cursor.style.left=e.clientX+'px';cursor.style.top=e.clientY+'px';spawnEmber(e.clientX,e.clientY);});
+
+function spawnEmber(x,y){
+  if(Math.random()>0.08)return;
+  const e=document.createElement('div');
+  e.className='ember';
+  const s=Math.random()*3+1;
+  const dx=(Math.random()-0.5)*60;
+  e.style.cssText=`left:${x}px;top:${y}px;width:${s}px;height:${s}px;background:hsl(${Math.random()*30+5},100%,60%);--dx:${dx}px;animation-duration:${Math.random()*1+0.6}s`;
+  document.body.appendChild(e);
+  setTimeout(()=>e.remove(),1600);
+}
+
+// SECTIONS & SCROLL
+const container=document.getElementById('scrollContainer');
+const sections=document.querySelectorAll('.section');
+const dots=document.querySelectorAll('.pdot');
+let currentSection=0;
+let isScrolling=false;
+
+// VISUALIZER CANVASES
+const vizCanvases={};
+sections.forEach((sec,i)=>{
+  const canvas=document.getElementById(`viz-${i}`);
+  if(canvas){
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+    vizCanvases[i]={canvas,ctx:canvas.getContext('2d'),phase:Math.random()*Math.PI*2,active:false,bars:Array.from({length:80},()=>({height:Math.random()*0.3+0.05,target:Math.random()*0.3+0.05,speed:Math.random()*0.05+0.02}))};
+  }
+});
+
+window.addEventListener('resize',()=>{
+  sections.forEach((sec,i)=>{
+    const canvas=document.getElementById(`viz-${i}`);
+    if(canvas){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+  });
+});
+
+// ANIMATE VISUALIZERS
+function animateViz(){
+  requestAnimationFrame(animateViz);
+  Object.entries(vizCanvases).forEach(([idx,v])=>{
+    if(!v.active)return;
+    const{ctx,canvas,bars}=v;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const bw=canvas.width/bars.length;
+    bars.forEach((bar,i)=>{
+      // Simulate beat-like movement
+      if(Math.random()<0.03){bar.target=Math.random()*0.8+0.1;}
+      bar.height+=(bar.target-bar.height)*bar.speed;
+      bar.target*=0.995;
+      if(bar.target<0.05)bar.target=Math.random()*0.4+0.05;
+      const h=bar.height*canvas.height*0.35;
+      const x=i*bw;
+      const y=canvas.height-h;
+      const alpha=bar.height*0.25;
+      const grad=ctx.createLinearGradient(0,y,0,canvas.height);
+      grad.addColorStop(0,`rgba(255,100,0,${alpha})`);
+      grad.addColorStop(1,`rgba(255,30,0,${alpha*0.2})`);
+      ctx.fillStyle=grad;
+      ctx.fillRect(x,y,bw-1,h);
+    });
+    // Glow center
+    const cg=ctx.createRadialGradient(canvas.width/2,canvas.height/2,0,canvas.width/2,canvas.height/2,canvas.width*0.5);
+    cg.addColorStop(0,`rgba(255,50,0,0.04)`);
+    cg.addColorStop(1,'transparent');
+    ctx.fillStyle=cg;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+  });
+}
+animateViz();
+
+// SECTION CHANGE
+function activateSection(idx){
+  sections.forEach((s,i)=>{
+    s.classList.toggle('active',i===idx);
+    if(vizCanvases[i])vizCanvases[i].active=(i===idx);
+  });
+  dots.forEach((d,i)=>d.classList.toggle('active',i===idx));
+  currentSection=idx;
+}
+
+// SCROLL DETECTION
+container.addEventListener('scroll',()=>{
+  const scrollTop=container.scrollTop;
+  const sectionHeight=window.innerHeight;
+  const idx=Math.round(scrollTop/sectionHeight);
+  if(idx!==currentSection){activateSection(idx);}
+},{passive:true});
+
+// DOT NAVIGATION
+function goToSection(idx){
+  container.scrollTo({top:idx*window.innerHeight,behavior:'smooth'});
+  activateSection(idx);
+}
+
+// KEYBOARD
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'&&currentSection<sections.length-1)goToSection(currentSection+1);
+  if(e.key==='ArrowUp'&&currentSection>0)goToSection(currentSection-1);
+});
+
+// TOUCH SWIPE
+let touchStartY=0;
+container.addEventListener('touchstart',e=>{touchStartY=e.touches[0].clientY;},{passive:true});
+container.addEventListener('touchend',e=>{
+  const diff=touchStartY-e.changedTouches[0].clientY;
+  if(Math.abs(diff)>50){
+    if(diff>0&&currentSection<sections.length-1)goToSection(currentSection+1);
+    else if(diff<0&&currentSection>0)goToSection(currentSection-1);
+  }
+},{passive:true});
+
+// INIT
+activateSection(0);
+</script>
+</body>
+</html>
